@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+      .container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      body{
+     background-image: url("https://media.istockphoto.com/id/1155958454/photo/digital-network-data-grid-technology-background.jpg?s=612x612&w=0&k=20&c=m4XknDTVhoay6bPUNf5-5M2td6i0N9GS0yT97KF7oOA=");
+      }
+      button{
+        margin: 0 auto;
+      }
+      input{
+        border: none;
+        background-color: rgb(214, 209, 202);
+        padding: 10px 8px;
+        border-radius: 5px;
+        font-size: 1.5rem;
+        &:focus{
+          outline: none;
+        }
+      }
+      .btn{
+    background-color: hwb(204 0% 0%);
+    color: white;
+    padding: 10px 50px;
+    border: none;
+    border-radius: 5rem;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+  &:hover {
+    transform: scale(3px);
+    box-shadow: 0 5px 15px rgba(36, 35, 35, 0.3);
+  }
+  &:active{
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(122, 83, 83, 0.4);
+  }
+}
+      label{
+        font-size: 1.5rem;
+        text-transform: capitalize;
+      }
+      h3{
+        text-align: center;
+         text-transform: capitalize;
+      }
+      li{
+        list-style: none;
+        margin: 10px auto;
+        cursor: pointer;
+      }
+    
+    </style>
+</head>
+<body>
+<div class="container">
+    <form id="shortcode">
+      <div class="card rounded p-2 shadow-lg">
+        <h3 class="text-success ">Generate short URL</h3>
+        <div>
+          <label for="url">Enter your URL:</label><br>
+          <input class="w-100" type="text" name="url" id="url" required>
+        </div>
+        <div>
+          <label for="shorturl ">Enter your ShortURL:</label><br>
+          <input class="w-100 mb-2" type="text" name="shorturl" id="shorturl" required >
+        </div>
+        <button class="btn btn-primary fs-2" type="submit">Shorten</button>
+        <div class="urs-heading">
+          <h3 class="mt-4">Shortend URLS</h3>
+          <ul id="Shortend-urls"></ul>
+        </div>
+       
+      </div>
+      </form>
+   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+    // Fetches shortened URLs from the server and displays them.
+   const fetchShortendURL = async () => {
+  try {
+    const response = await fetch('/links'); // Fetch stored URLs from the server
+    if (!response.ok) throw new Error('Failed to fetch links');
+
+    const links = await response.json();
+    console.log('Links:', links);
+
+    const list = document.getElementById('Shortend-urls');
+    list.innerHTML = ''; // Clear existing list
+
+    for (const [shortcode, url] of Object.entries(links)) {
+      const li = document.createElement('li');
+      const truncatedURL=url.length>=30? `${url.slice(0,30)}...`:url;
+      li.innerHTML = `<a href="${url}" target="_blank">${window.location.origin}/${shortcode}</a> - ${truncatedURL}`;
+      list.appendChild(li);
+    }
+  } catch (error) {
+    console.error('Error fetching links:', error);
+  }
+};
+// Sends the URL to the server and updates the list.
+document.getElementById('shortcode').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const myform = new FormData(event.target);
+  const url = myform.get('url');
+  const shorturl = myform.get('shorturl');
+
+  try {
+    const response = await fetch('/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, shorturl }),
+    });
+
+    if (response.ok) {
+      fetchShortendURL(); // Refresh the list
+      alert('Form submitted successfully');
+      event.target.reset();
+    } else {
+      const errorMessage = await response.text();
+      alert(errorMessage);
+    }
+  } catch (error) {
+    console.error('Error submitting form:', error);
+  }
+});
+
+// Fetch the shortened URLs on page load
+fetchShortendURL();  
+  </script>
+</body>
+</html>
