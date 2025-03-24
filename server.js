@@ -105,7 +105,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const port = 3045;
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+const port = process.env.PORT || 3045;
+server.listen(port, '0.0.0.0', () => {
+  console.log(`✅ Server is running on http://localhost:${port}`);
 });
